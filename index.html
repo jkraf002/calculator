@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body, html {
+            font-family: sans-serif;
+        }
+
+        #container {
+            display: grid;
+            grid-template-columns: repeat(4, auto);
+            grid-template-rows: 27% repeat(5, auto);
+            gap: 8px;
+            padding: 1%;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: gray;
+            border-radius: 2.5%;
+            height: 600px;
+            width: 400px;
+        }
+
+        #display {
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+            grid-area: 1 / 1 / span 1 / span 4;
+            padding: 0.5rem 1.0rem;
+            background-color: white;
+            border-radius: 10px;
+            
+        }
+
+        #display > div {
+            font-size: 50px;
+        }
+
+        #zero {
+            grid-column: 1 / span 2;
+        }
+
+        #container > button {
+            color: white;
+            font-size: 16px;
+            border: solid 1px;
+            border-radius: 10px;
+        }
+
+        .operator {
+            background-color: darkorange;
+        }
+
+        .operand {
+            background-color: darkslategray;
+        }
+
+        .utility {
+            background-color: darkgray;
+        }
+
+    </style>
+</head>
+<body>
+    <div id='container'>
+        <div id='display'>
+            <div>Lorem ipsum</div>
+        </div>
+        <button class='utility'>AC</button>
+        <button class='utility'>C</button>
+        <button class='utility'>+/-</button>
+        <button class='operator'>/</button>
+        <button class='operand'>7</button>
+        <button class='operand'>8</button>
+        <button class='operand'>9</button>
+        <button class='operator'>x</button>
+        <button class='operand'>4</button>
+        <button class='operand'>5</button>
+        <button class='operand'>6</button>
+        <button class='operator'>-</button>
+        <button class='operand'>1</button>
+        <button class='operand'>2</button>
+        <button class='operand'>3</button>
+        <button class='operator'>+</button>
+        <button class='operand' id='zero'>0</button>
+        <button class='operand' >.</button>
+        <button class='operator'>=</button>
+    </div>
+</body>
+<script>
+    function add(a, b) {
+        return a + b;
+    }
+
+    function subtract(a, b) {
+        return a - b;
+    }
+
+    function multiply(a, b) {
+        return a * b;
+    }
+
+    function divide(a, b) {
+        return a / b;
+    }
+
+    function operate(operator, a, b) {
+        if (operator == '+') {
+            return add(a, b);
+        } else if (operator == '-') {
+            return subtract(a, b);
+        } else if (operator == '*') {
+            return multiply(a, b);
+        } else if (operator == '/') {
+            return divide(a, b);
+        }
+    }
+</script>
+</html>
