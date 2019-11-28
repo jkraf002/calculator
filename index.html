@@ -39,11 +39,13 @@
             grid-column: 1 / span 2;
         }
 
-        #container > button {
+        .operator, .operand, .utility {
             color: white;
             font-size: 16px;
             border: solid 1px;
             border-radius: 10px;
+            line-height: 0px;
+            padding: 0px;
         }
 
         .operator {
@@ -56,6 +58,20 @@
 
         .utility {
             background-color: darkgray;
+            color: black;
+            border-color: white;
+        }
+
+        #add, #subtract, #equal {
+            font-size: 130%;
+        }
+
+        #divide {
+            font-size: 150%;
+        } 
+
+        #multiply, #plusMinus {
+            font-size: 110%;
         }
 
     </style>
@@ -63,27 +79,27 @@
 <body>
     <div id='container'>
         <div id='display'>
-            <div>Lorem ipsum</div>
+            <div>0</div>
         </div>
-        <button class='utility'>AC</button>
-        <button class='utility'>C</button>
-        <button class='utility'>+/-</button>
-        <button class='operator'>/</button>
-        <button class='operand'>7</button>
-        <button class='operand'>8</button>
-        <button class='operand'>9</button>
-        <button class='operator'>x</button>
-        <button class='operand'>4</button>
-        <button class='operand'>5</button>
-        <button class='operand'>6</button>
-        <button class='operator'>-</button>
-        <button class='operand'>1</button>
-        <button class='operand'>2</button>
-        <button class='operand'>3</button>
-        <button class='operator'>+</button>
-        <button class='operand' id='zero'>0</button>
-        <button class='operand' >.</button>
-        <button class='operator'>=</button>
+        <button class='utility' value="AC">AC</button>
+        <button class='utility' value="C">C</button>
+        <button class='utility' id="plusMinus" value="plusMinus">&plusmn;</button>
+        <button class='operator' id="divide" value="/">&#247;</button>
+        <button class='operand' value="7">7</button>
+        <button class='operand' value="8">8</button>
+        <button class='operand' value="9">9</button>
+        <button class='operator' id="multiply" value="*">&#10799;</button>
+        <button class='operand' value="4">4</button>
+        <button class='operand' value="5">5</button>
+        <button class='operand' value="6">6</button>
+        <button class='operator' id="subtract" value="-">&ndash;</button>
+        <button class='operand' value="1">1</button>
+        <button class='operand' value="2">2</button>
+        <button class='operand' value="3">3</button>
+        <button class='operator' id="add" value="+">+</button>
+        <button class='operand' id='zero' value="0">0</button>
+        <button class='operand'  value=".">.</button>
+        <button class='operator' id="equal" value="=">=</button>
     </div>
 </body>
 <script>
@@ -103,6 +119,7 @@
         return a / b;
     }
 
+    // Calls one of the 4 operator functions depending on operator string parameter
     function operate(operator, a, b) {
         if (operator == '+') {
             return add(a, b);
@@ -114,5 +131,71 @@
             return divide(a, b);
         }
     }
+
+    // Updates display on calculator when called
+    function updateDisplay() {
+        document.getElementById('display').firstElementChild.textContent = displayString;
+    }
+
+    // The logic behind the calculator
+    function storeValue(e) {
+        let tmpA = undefined;
+        let tmpB = undefined;
+
+        // All Clear button reloads page
+        if (e.target.value == "AC") {
+            window.location.reload();
+        }
+
+        // Clear button reloads page if no operator has been selected
+        // Sets current display and tmpA to zero otherwise.
+        else if (e.target.value == "C") {
+            if (tmpA == undefined) {
+                window.location.reload();
+            } else {
+            displayString = "0";
+            tmpA = 0;
+            updateDisplay();
+            }
+        }
+
+        // plusMinus button reverses sign of display value
+        else if (e.target.value == "plusMinus") {
+            if (displayString[0] == "-") {
+                displayString = displayString.slice(1,);
+                updateDisplay();
+            } else {
+                displayString = "-" + displayString;
+                updateDisplay();
+            }
+        }
+
+        // Number input 
+        else if (e.target.classList.contains('operand')) {
+            if (displayString == "0") {
+                displayString = e.target.value;
+                updateDisplay();
+            } else if (displayString == "-0") {
+                displayString = "-" + e.target.value;
+                updateDisplay();
+            } else {
+                displayString += e.target.value;
+                updateDisplay();
+            }
+        }
+        
+        // STOPPED HERE - Jason
+        // Operator input
+        else if (e.target.classList.contains('operator') && tmpA == undefined) {
+            tmpA = Number(displayString);
+        }
+        
+    }
+
+    let displayString = "0";
+    const display = document.getElementById('display');
+    const buttons = Array.from(document.querySelectorAll('button'));
+    buttons.forEach(button => button.addEventListener('mousedown', storeValue));
+
 </script>
 </html>
