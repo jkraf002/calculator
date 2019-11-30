@@ -39,7 +39,7 @@
             grid-column: 1 / span 2;
         }
 
-        .operator, .operand, .utility {
+        .operator, .operand, .utility, #equal {
             color: white;
             font-size: 16px;
             border: solid 1px;
@@ -48,7 +48,7 @@
             padding: 0px;
         }
 
-        .operator {
+        .operator, #equal {
             background-color: darkorange;
         }
 
@@ -99,7 +99,7 @@
         <button class='operator' id="add" value="+">+</button>
         <button class='operand' id='zero' value="0">0</button>
         <button class='operand'  value=".">.</button>
-        <button class='operator' id="equal" value="=">=</button>
+        <button id="equal" value="=">=</button>
     </div>
 </body>
 <script>
@@ -135,67 +135,180 @@
     // Updates display on calculator when called
     function updateDisplay() {
         document.getElementById('display').firstElementChild.textContent = displayString;
+        // HERE HERE HERE if display grows too long, convert to scientific notation HERE HERE HERE
     }
 
     // The logic behind the calculator
     function storeValue(e) {
-        let tmpA = undefined;
-        let tmpB = undefined;
+        
 
         // All Clear button reloads page
         if (e.target.value == "AC") {
             window.location.reload();
         }
 
-        // Clear button reloads page if no operator has been selected
-        // Sets current display and tmpA to zero otherwise.
+        // Clear button
         else if (e.target.value == "C") {
-            if (tmpA == undefined) {
-                window.location.reload();
-            } else {
-            displayString = "0";
-            tmpA = 0;
-            updateDisplay();
-            }
+
         }
 
         // plusMinus button reverses sign of display value
         else if (e.target.value == "plusMinus") {
             if (displayString[0] == "-") {
                 displayString = displayString.slice(1,);
-                updateDisplay();
-            } else {
+            } else if (tmpA != undefined) {
+                displayString = "-0";
+                if (!bFlag) {
+                    bFlag = true;
+                } else if (!cFlag) {
+                    cFlag = true;
+                }
+            }else {
                 displayString = "-" + displayString;
-                updateDisplay();
             }
+            updateDisplay();
         }
 
         // Number input 
-        else if (e.target.classList.contains('operand')) {
-            if (displayString == "0") {
-                displayString = e.target.value;
-                updateDisplay();
-            } else if (displayString == "-0") {
-                displayString = "-" + e.target.value;
-                updateDisplay();
-            } else {
-                displayString += e.target.value;
-                updateDisplay();
+        else if (e.target.classList.contains("operand")) {
+            if (tmpA == undefined) {
+                if (displayString == "0") {
+                    displayString = e.target.value;
+                } else if (displayString == "-0") {
+                    displayString = "-" + e.target.value;
+                } else {
+                    displayString += e.target.value;
+                }
+            } else if (tmpB == undefined || bFlag == true) {
+                if (!bFlag) {
+                    displayString = e.target.value;
+                    bFlag = true;
+                } else if (bFlag) {
+                    if (displayString == "-0") {
+                        displayString = "-" + e.target.value;
+                    } else {
+                        displayString += e.target.value;
+                    }
+                }
+            } else if (tmpC == undefined || cFlag == true) {
+                if (!cFlag) {
+                    displayString = e.target.value;
+                    cFlag = true;
+                } else if (cFlag) {
+                    if (displayString == "-0") {
+                        displayString = "-" + e.target.value;
+                    } else {
+                        displayString += e.target.value;
+                    }
+                }
             }
+            updateDisplay();
         }
         
-        // STOPPED HERE - Jason
         // Operator input
-        else if (e.target.classList.contains('operator') && tmpA == undefined) {
-            tmpA = Number(displayString);
+        else if (e.target.classList.contains("operator")) {
+            if (tmpA == undefined) {
+                tmpA = Number(displayString);
+                tmpOperator = e.target.value;
+            } else if (tmpA != undefined && tmpB == undefined) {
+                tmpB = Number(displayString);
+                if (tmpOperator == "/" || tmpOperator == "*" || e.target.value == "+" || e.target.value == "-") {
+                    tmpA = operate(tmpOperator, tmpA, tmpB);
+                    tmpOperator = e.target.value;
+                    displayString = String(tmpA);
+                    updateDisplay();
+                    bFlag = false;
+                    tmpB = undefined;
+                } else if (tmpOperator == "+" || tmpOperator == "-" && e.target.value == "/" || e.target.value == "*") {
+                    operator = e.target.value;
+                    bFlag = false;
+                }
+            } else if (operator != undefined) {
+                tmpC = Number(displayString);
+                tmpB = operate(operator, tmpB, tmpC);
+                tmpA = operate(tmpOperator, tmpA, tmpB);
+                displayString = String(tmpA);
+                updateDisplay();
+                tmpOperator = e.target.value;
+                operator = undefined;
+                tmpB = undefined;
+                tmpC = undefined;
+                bFlag = false;
+                cFlag = false;
+            }
+        }
+
+        // Equals input
+        else if (e.target.value == "=") {
+            if (operator) {
+                tmpC = Number(displayString);
+                tmpB = operate(operator, tmpB, tmpC);
+                tmpA = operate(tmpOperator, tmpA, tmpB);
+                displayString = String(tmpA);
+                updateDisplay();
+                equalOperator = operator;
+                tmpEqual = tmpC;
+                clear();
+                
+            } else if (tmpOperator) {
+                if (tmpB == undefined) {
+                    tmpB = Number(displayString);
+                }
+                tmpA = operate(tmpOperator, tmpA, tmpB);
+                displayString = String(tmpA);
+                updateDisplay();
+                equalOperator = tmpOperator;
+                tmpEqual = tmpB;
+                clear();
+
+            } else if (equalOperator) {
+                tmpA = Number(displayString);
+                tmpA = operate(equalOperator, tmpA, tmpEqual);
+                displayString = String(tmpA);
+                tmpA = undefined;
+                updateDisplay();
+            }
+
+            // updateDisplay() and reset variables
+            
         }
         
     }
 
+    function clear() {
+        tmpOperator = undefined;
+        operator = undefined;
+        tmpC = undefined;
+        tmpB = undefined;
+        tmpA = undefined;
+        cFlag = false;
+        bFlag = false;        
+    }
+
+    function test() {
+        console.log(tmpA);
+        console.log(tmpB);
+        console.log(tmpC);
+        console.log(operator);
+        console.log(tmpOperator);
+    }
+
+    let tmpA = undefined;
+    let tmpB = undefined;
+    let tmpC = undefined;
+    let tmpEqual = undefined;
+    let tmpOperator = undefined;
+    let equalOperator = undefined;
+    let operator = undefined;
+    let bFlag = false;
+    let cFlag = false;
     let displayString = "0";
+
     const display = document.getElementById('display');
     const buttons = Array.from(document.querySelectorAll('button'));
     buttons.forEach(button => button.addEventListener('mousedown', storeValue));
+    // Add eventListeners for keyboard input
+    // Add transition on calculator keys to let user know input has been entered.
 
 </script>
 </html>
