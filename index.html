@@ -46,6 +46,7 @@
             border-radius: 10px;
             line-height: 0px;
             padding: 0px;
+            transition: all .15s ease;
         }
 
         .operator, #equal {
@@ -74,6 +75,10 @@
             font-size: 110%;
         }
 
+        .pressed {
+            opacity: 50%;
+        }
+
     </style>
 </head>
 <body>
@@ -98,7 +103,7 @@
         <button class='operand' value="3">3</button>
         <button class='operator' id="add" value="+">+</button>
         <button class='operand' id='zero' value="0">0</button>
-        <button class='operand'  value=".">.</button>
+        <button class='operand' id="period" value=".">.</button>
         <button id="equal" value="=">=</button>
     </div>
 </body>
@@ -140,11 +145,15 @@
 
     // The logic behind the calculator
     function storeValue(e) {
-        
+        e.target.classList.add('pressed');
 
         // All Clear button reloads page
         if (e.target.value == "AC") {
-            window.location.reload();
+            clear();
+            tmpEqual = undefined;
+            equalOperator = undefined;
+            displayString = "0";
+            updateDisplay();
         }
 
         // Clear button
@@ -156,13 +165,6 @@
         else if (e.target.value == "plusMinus") {
             if (displayString[0] == "-") {
                 displayString = displayString.slice(1,);
-            } else if (tmpA != undefined) {
-                displayString = "-0";
-                if (!bFlag) {
-                    bFlag = true;
-                } else if (!cFlag) {
-                    cFlag = true;
-                }
             }else {
                 displayString = "-" + displayString;
             }
@@ -172,8 +174,9 @@
         // Number input 
         else if (e.target.classList.contains("operand")) {
             if (tmpA == undefined) {
-                if (displayString == "0") {
+                if (displayString == "0" || displayString == "Error" || !aFlag) {
                     displayString = e.target.value;
+                    aFlag = true;
                 } else if (displayString == "-0") {
                     displayString = "-" + e.target.value;
                 } else {
@@ -267,10 +270,18 @@
                 displayString = String(tmpA);
                 tmpA = undefined;
                 updateDisplay();
-            }
+            }          
+        }
 
-            // updateDisplay() and reset variables
-            
+        if (displayString == "NaN" || displayString == "Infinity") {
+            displayString = "Error";
+            updateDisplay();
+        }
+
+        if (displayString.includes(".")) {
+            document.getElementById("period").removeEventListener('mousedown', storeValue);
+        } else {
+            document.getElementById("period").addEventListener('mousedown', storeValue);
         }
         
     }
@@ -282,15 +293,12 @@
         tmpB = undefined;
         tmpA = undefined;
         cFlag = false;
-        bFlag = false;        
+        bFlag = false;   
+        aFlag = false;     
     }
 
-    function test() {
-        console.log(tmpA);
-        console.log(tmpB);
-        console.log(tmpC);
-        console.log(operator);
-        console.log(tmpOperator);
+    function removeTransition(e) {
+        e.target.classList.remove('pressed');
     }
 
     let tmpA = undefined;
@@ -300,6 +308,7 @@
     let tmpOperator = undefined;
     let equalOperator = undefined;
     let operator = undefined;
+    let aFlag = false;
     let bFlag = false;
     let cFlag = false;
     let displayString = "0";
@@ -307,8 +316,8 @@
     const display = document.getElementById('display');
     const buttons = Array.from(document.querySelectorAll('button'));
     buttons.forEach(button => button.addEventListener('mousedown', storeValue));
+    buttons.forEach(button => button.addEventListener('transitionend', removeTransition));
     // Add eventListeners for keyboard input
-    // Add transition on calculator keys to let user know input has been entered.
 
 </script>
 </html>
